@@ -62,7 +62,6 @@ function saveAccessToken(accessToken){
 	});*/
 	
 	console.log("end");
-  
 }
 
 var stateKey = 'spotify_auth_state';
@@ -143,7 +142,7 @@ app.get('/callback', function(req, res) {
             access_token: access_token,
             refresh_token: refresh_token
           }));*/
-    	res.redirect('http://ec2-3-88-85-136.compute-1.amazonaws.com');
+    	res.redirect('http://ec2-3-88-85-136.compute-1.amazonaws.com/home');
 
       } else {
         res.redirect('/#' +
