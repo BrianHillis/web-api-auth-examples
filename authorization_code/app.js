@@ -12,6 +12,11 @@ var request = require('request'); // "Request" library
 var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
+//var server = require.resolve('/var/www/html/TheBlock/server.js');
+//var server = require('../../server.js');
+var $ = require("jquery");
+var ajax = require("ajax");
+var ajaxrequest = require('ajax-request');
 
 var client_id = 'e6d465ab8afb4cd4beb72069fa2f4d1f'; // Your client id
 var client_secret = '89f286fa419d46d68512c086d231e399'; // Your secret
@@ -31,6 +36,34 @@ var generateRandomString = function(length) {
   }
   return text;
 };
+
+function saveAccessToken(accessToken){
+	console.log("begin");
+	ajaxrequest({
+		url: 'http://ec2-3-88-85-136.compute-1.amazonaws.com:3001/setSpotifyToken',
+		method: 'GET',
+		dataType: 'text',
+		data: {
+			'access_token': accessToken
+		}	
+	}, function(err,res,body){
+		console.log("test");
+		console.log(res);
+	});
+
+	/*$.ajax({
+		url: 'http://ec2-3-88-85-136.compute-1.amazonaws.com:3001/setSpotifyToken',
+		timeout: 100000,
+		data:{
+			'access_token': accessToken
+		}
+	}).done(function(){
+		console.log("send");
+	});*/
+	
+	console.log("end");
+  
+}
 
 var stateKey = 'spotify_auth_state';
 
@@ -98,6 +131,7 @@ app.get('/callback', function(req, res) {
           json: true
         };
 	console.log(access_token);
+	saveAccessToken(access_token);	
         // use the access token to access the Spotify Web API
         request.get(options, function(error, response, body) {
           console.log(body);
