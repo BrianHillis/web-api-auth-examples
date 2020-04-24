@@ -37,31 +37,48 @@ var generateRandomString = function(length) {
   return text;
 };
 
-function saveAccessToken(accessToken){
+function saveAccessToken(accessToken,refresh,username){
 	console.log("begin");
 	ajaxrequest({
 		url: 'http://ec2-3-88-85-136.compute-1.amazonaws.com:3001/setSpotifyToken',
 		method: 'GET',
 		dataType: 'text',
 		data: {
-			'access_token': accessToken
+			'access_token': accessToken,
+			'refresh_token': refresh,
+			'username': username
 		}	
 	}, function(err,res,body){
 		console.log("test");
-		console.log(res);
 	});
 
-	/*$.ajax({
-		url: 'http://ec2-3-88-85-136.compute-1.amazonaws.com:3001/setSpotifyToken',
-		timeout: 100000,
-		data:{
-			'access_token': accessToken
+	/*ajaxrequest({
+		url: 'https://api.spotify.com/v1/me/top/track',
+		type: 'GET',
+		dataType: 'application-json',
+		contentType: 'application-json',
+		headers: {
+			'Authorization' : 'Bearer ' + accessToken
 		}
-	}).done(function(){
-		console.log("send");
-	});*/
-	
+	}, function(err,res,body){
+		console.log(err);
+		console.log(body);
+	});	
 	console.log("end");
+
+	ajaxrequest({
+                url: 'https://api.spotify.com/v1/me/player/recently-played',
+                type: 'GET',
+                dataType: 'application-json',
+                contentType: 'application-json',
+                headers: {
+                        'Authorization' : 'Bearer ' + accessToken
+                }
+        }, function(err,res,body){
+                console.log(body);
+        });*/
+        console.log("end");
+
 }
 
 var stateKey = 'spotify_auth_state';
@@ -76,6 +93,7 @@ app.get('/login', function(req, res) {
 
   var state = generateRandomString(16);
   res.cookie(stateKey, state);
+  res.cookie('username',req.cookies.username);
 
   // your application requests authorization
   var scope = 'user-read-private user-read-email user-top-read user-read-recently-played';
@@ -96,6 +114,9 @@ app.get('/callback', function(req, res) {
 
   var code = req.query.code || null;
   var state = req.query.state || null;
+  var username = req.cookies;
+  console.log("callback cookies");
+  console.log(req.cookies);
   var storedState = req.cookies ? req.cookies[stateKey] : null;
 
   if (state === null || state !== storedState) {
@@ -130,8 +151,8 @@ app.get('/callback', function(req, res) {
           json: true
         };
 	console.log(access_token);
-	saveAccessToken(access_token);	
-        // use the access token to access the Spotify Web API
+	saveAccessToken(access_token, refresh_token,req.cookies.username);	
+        // use the accesetoken to access the Spotify Web API
         request.get(options, function(error, response, body) {
           console.log(body);
         });
